@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import Joi from "joi";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
-const Login = () => {
+const Register = () => {
   const [user, setUser] = useState({
     email: "",
     password: "",
@@ -46,7 +45,7 @@ const Login = () => {
           setErrorsList(error);
         } else {
           console.log("password incorrect");
-        } 
+        }
       } catch (exception) {
         console.log("email does not exist");
       }
@@ -54,28 +53,43 @@ const Login = () => {
   };
 
   return (
-    <div className="container text-center my-5">
-  <div className="user my-3">
-    <i className="fas fa-user-secret user-icon" />
-    <h4 className="login">Login</h4>
-  </div>
-  <div className="card p-5 w-50 m-auto">
-    {errorsList.map((err) => (
+    <form className="container" method="POST">
+      {errorsList.map((err) => (
         <div class="alert alert-danger" role="alert">
           {err}
         </div>
       ))}
-    <form method="POST" action="/handleLogin">
-      <input className="form-control" placeholder="Enter your email" type="text" name="email" onChange={onChange}  />
-      <input className="form-control my-4 " placeholder="Enter your Password" type="password" name="password" onChange={onChange} />
-      <button type="submit" className="btn btn-default-outline my-4 w-100 rounded" onClick={submitForm}>Login</button>
-      <p><Link className="text-muted forgot btn" to="/">I Forgot My Password</Link></p>
-      <Link className="btn btn-default-outline" to="register">Register</Link>
+      <div className="form-group">
+        <label htmlFor="exampleInputEmail1">Email address</label>
+        <input
+          type="email"
+          className="form-control"
+          id="exampleInputEmail1"
+          aria-describedby="emailHelp"
+          name="email"
+          placeholder="Enter email"
+          onChange={onChange}
+        />
+        <small id="emailHelp" className="form-text text-muted">
+          We'll never share your email with anyone else.
+        </small>
+      </div>
+      <div className="form-group">
+        <label htmlFor="exampleInputPassword1">Password</label>
+        <input
+          type="password"
+          className="form-control"
+          id="exampleInputPassword1"
+          placeholder="Password"
+          name="password"
+          onChange={onChange}
+        />
+      </div>
+      <button type="submit" onClick={submitForm} className="btn btn-primary">
+        Submit
+      </button>
     </form>
-  </div>
-</div>
-
   );
 };
 
-export default Login;
+export default Register;
