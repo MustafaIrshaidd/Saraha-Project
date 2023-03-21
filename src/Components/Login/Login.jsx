@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import Joi from "joi";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import cookie from "react-cookies"
+import LoaderBtn from "../LoaderBtn/LoaderBtn";
 
-const Login = () => {
+
+const Login = ({logUser}) => {
   const [user, setUser] = useState({
     email: "",
     password: "",
   });
   const [errorsList, setErrorsList] = useState([]);
+  const navigate=useNavigate();
+  const [loader,setLoader]=useState(false);
 
   const validateUser = () => {
     const schema = Joi.object({
@@ -25,6 +30,8 @@ const Login = () => {
 
   const submitForm = async (event) => {
     event.preventDefault();
+    setLoader(true);
+    
 
     const validation = validateUser();
     const error = [];
@@ -32,24 +39,41 @@ const Login = () => {
     if (validation.error) {
       validation.error.details.map((err) => error.push(err.message));
       setErrorsList(error);
+      setLoader(false);
     } else {
       setErrorsList([]);
       try {
+        
         const result = await axios.post(
           "https://lazy-blue-sockeye-gear.cyclic.app/api/v1/auth/signin",
           user
         );
         if (result.data.message === "success") {
-          console.log(result.data.token);
+          
+          const expires = new Date();
+          const futureDay = expires.getDate()+1;
+          expires.setDate(futureDay)
+          cookie.save("token",result.data.token,{expires})
+          logUser(result.data.token)
+          navigate("/messages");
+          setLoader(false);
+
         } else if (result.data.message === "validation error") {
           result.data.err.map((err) => error.push(err[0].message));
           setErrorsList(error);
+          setLoader(false);
+          
         } else {
           console.log("password incorrect");
+          setLoader(false);
         } 
       } catch (exception) {
         console.log("email does not exist");
+        setLoader(false);
+        
       }
+      setLoader(false);
+      
     }
   };
 
@@ -68,9 +92,9 @@ const Login = () => {
     <form method="POST" action="/handleLogin">
       <input className="form-control" placeholder="Enter your email" type="text" name="email" onChange={onChange}  />
       <input className="form-control my-4 " placeholder="Enter your Password" type="password" name="password" onChange={onChange} />
-      <button type="submit" className="btn btn-default-outline my-4 w-100 rounded" onClick={submitForm}>Login</button>
-      <p><Link className="text-muted forgot btn" to="/">I Forgot My Password</Link></p>
-      <Link className="btn btn-default-outline" to="register">Register</Link>
+      {loader? <LoaderBtn/> : <button type="submit" className="btn btn-default-outline my-4 w-100 rounded" onClick={submitForm}>Login</button>}
+      <p><Link className="text-muted forgot btn" to="/forget-password">I Forgot My Password</Link></p>
+      <Link className="btn btn-default-outline" to="/register">Register</Link>
     </form>
   </div>
 </div>
